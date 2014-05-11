@@ -1,6 +1,7 @@
 var request = require('request')
 var series = require('run-series')
 var child = require('child_process')
+var path = require('path')
 var Emitter = require('events').EventEmitter
 
 var base = 'https://api.github.com'
@@ -39,16 +40,40 @@ module.exports = function(token, cb) {
   
   return ev
   
-  function cloneRepos(repos, cb) {
-    var fns = repos.map(function(repo) {
+  function cloneRepos(repos, options, cb) {
+    if (typeof options === 'function') {
+      cb = options
+      options = {}
+    }
+    var functions = repos.map(function(repo) {
       return function clone(cb) {
         ev.emit('clone-progress', repo)
+        var repoResult = {full_name: repo.full_name, clone_url: repo.clone_url}
         child.exec('git clone ' + repo.clone_url, function(err, stdo, stde) {
-          cb(err, {full_name: repo.full_name, clone_url: repo.clone_url, stdout: stdo, stde: stde})
+          repoResult.stdout = stdo
+          repoResult.stderr = stde
+          if (!options.pull) return cb(null, repoResult)
+          if (stde.indexOf('already exists') > -1) {
+            var repoPath = path.join(process.cwd(), repo.name)
+            child.exec('git pull origin master', {cwd: repoPath}, function(err, stdo, stde) {
+              repoResult.stdout = stdo
+              repoResult.stderr = stde
+              cb(null, repoResult)
+            })
+          } else {
+            cb(null, repoResult)
+          }
         })
       }
     })
-    series(fns, cb)
+    series(functions, function(err, results) {
+      var stats = {skipped: 0, cloned: 0, pulled: 0}
+      results.map(function(r) {
+        if (r.stderr.indexOf('already exists') > -1) stats.skipped++
+        if (r.stderr.indexOf('Cloning into') > -1) stats.cloned++
+      })
+      cb(err, stats)
+    })
   }
   
 }

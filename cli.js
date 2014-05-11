@@ -21,24 +21,30 @@ auth(function(err, authData) {
   if (err) return console.error(err)
   var mr = multirepo(authData.token, function(err, data) {
     if (err) return console.error(err)
+    
     if (argv._[0] === 'clone') {
+      
       var repos = []
+      
       data.repos.map(function(r) {
         if (r.owner.login === data.user.login) repos.push(r)
       })
-      mr.cloneRepos(repos, function(err, results) {
+      
+      mr.cloneRepos(repos, argv, function(err, results) {
         if (err) return console.error(err)
-        console.error(results)
+        log('Cloned', results.cloned, 'new repos, skipped', results.skipped, 'existing repos.')
       })
     }
+    
   })
+  
   mr.on('load-progress', function(num) {
     log('Loading repo page ' + num + ' (100 per page) ...')
   })
+  
   mr.on('clone-progress', function(repo) {
     log('Cloning repo ' + repo.full_name + '...')
   })
-  
 })
 
 function auth(cb) {
