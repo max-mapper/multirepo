@@ -2,7 +2,7 @@
 
 [![NPM](https://nodei.co/npm/multirepo.png)](https://nodei.co/npm/multirepo/)
 
-a power tool for batch processing github repos + npm modules
+a power tool for batch processing multiple github repositories
 
 ## usage
 
