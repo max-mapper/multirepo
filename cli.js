@@ -50,8 +50,18 @@ auth(function(err, authData) {
     
     console.log(repos.length + ' repo(s) with new pushes have been found')
     
+    var shouldClone = false
+    
+    if (argv._[0] === 'pull') {
+      shouldClone = true
+      argv.pull = true
+    }
+    
     if (argv._[0] === 'clone') {
-      
+      shouldClone = true
+    }
+    
+    if (shouldClone) {
       if (repos.length === 0) return console.log('No new pushes since', lastFetch)
       
       mr.cloneRepos(repos, argv, function(err, results) {
