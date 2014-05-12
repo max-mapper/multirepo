@@ -6,11 +6,12 @@ var Emitter = require('events').EventEmitter
 
 var base = 'https://api.github.com'
 
-module.exports = function(token, cb) {
+module.exports = function(opts, cb) {
+  if (!opts.token) return cb(new Error('must pass in token'))
   var ev = new Emitter()
   
   var headers = {"user-agent": "multirepo module"}
-  headers['Authorization'] = 'token ' + token
+  headers['Authorization'] = 'token ' + opts.token
   
   request(base + '/user', {json: true, headers: headers}, function(err, resp, me) {
     if (err) return cb(err)
@@ -24,12 +25,20 @@ module.exports = function(token, cb) {
       setImmediate(getRepos)
       
       function getRepos() {
-        var reqUrl = base + '/user/repos?page=' + pageNum + '&per_page=100'
+        var reqUrl = base + '/user/repos?sort=pushed&page=' + pageNum + '&per_page=100'
         ev.emit('load-progress', pageNum.toString())
         request(reqUrl, { json: true, headers: headers }, function(err, resp, repos) {
           if (err || resp.statusCode > 299) return cb(err || resp.statusCode)
           if (repos.length === 0) return cb(null, {user: me, repos: allRepos})
-          allRepos = allRepos.concat(repos)
+          if (opts.since) {
+            for (var i = 0; i < repos.length; i++) {
+              var r = repos[i]
+              if (r.pushed_at < opts.since) return cb(null, {user: me, repos: allRepos})
+              else allRepos = allRepos.concat(r)
+            }
+          } else {
+            allRepos = allRepos.concat(repos)
+          }
           getRepos(pageNum++)
         })
       }
@@ -54,6 +63,8 @@ module.exports = function(token, cb) {
           repoResult.stderr = stde
           if (!options.pull) return cb(null, repoResult)
           if (stde.indexOf('already exists') > -1) {
+            ev.emit('clone-progress', repo, 'Pulling')
+            
             var repoPath = path.join(process.cwd(), repo.name)
             child.exec('git pull origin master', {cwd: repoPath}, function(err, stdo, stde) {
               repoResult.stdout = stdo
@@ -71,6 +82,7 @@ module.exports = function(token, cb) {
       results.map(function(r) {
         if (r.stderr.indexOf('already exists') > -1) stats.skipped++
         if (r.stderr.indexOf('Cloning into') > -1) stats.cloned++
+        if (r.stderr.indexOf('FETCH_HEAD') > -1) stats.pulled++
       })
       cb(err, stats)
     })

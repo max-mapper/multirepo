@@ -1,6 +1,6 @@
 {
   "name": "multirepo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "a power tool for batch processing github repos + npm modules",
   "main": "index.js",
   "bin": {
@@ -11,6 +11,7 @@
   "dependencies": {
     "ghauth": "^0.1.0",
     "minimist": "0.0.9",
+    "mkdirp": "^0.5.0",
     "run-series": "^1.0.2",
     "single-line-log": "^0.3.1"
   },
