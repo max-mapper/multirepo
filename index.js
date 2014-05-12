@@ -59,7 +59,7 @@ module.exports = function(opts, cb) {
       return function clone(cb) {
         var repoPath = path.join(process.cwd(), repo.name)
         var repoResult = {full_name: repo.full_name, clone_url: repo.clone_url}
-        if (fs.existsSync(repoPath)) return pull()
+        if (options.pull && fs.existsSync(repoPath)) return pull()
         ev.emit('clone-progress', repo)
         child.exec('git clone ' + repo.clone_url, function(err, stdo, stde) {
           repoResult.stdout = stdo
