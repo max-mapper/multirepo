@@ -56,7 +56,7 @@ auth(function(err, authData) {
       
       mr.cloneRepos(repos, argv, function(err, results) {
         if (err) return console.error(err)
-        log('Cloned', results.cloned, 'new repos, skipped', results.skipped, 'existing repos,', 'pulled', results.pulled, 'existing repos.')
+        console.log('Cloned', results.cloned, 'new repos, skipped', results.skipped, 'existing repos,', 'pulled', results.pulled, 'existing repos.')
         fs.writeFileSync(lastFetchPath, new Date().toISOString())
       })
     }
@@ -69,7 +69,7 @@ auth(function(err, authData) {
   
   mr.on('clone-progress', function(repo, verb) {
     verb = verb || 'Cloning'
-    log(verb + ' repo ' + repo.full_name + '...')
+    console.log(verb + ' repo ' + repo.full_name + '...')
   })
 })
 
