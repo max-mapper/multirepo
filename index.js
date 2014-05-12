@@ -26,15 +26,17 @@ module.exports = function(opts, cb) {
       setImmediate(getRepos)
       
       function getRepos() {
-        var reqUrl = base + '/user/repos?sort=pushed&page=' + pageNum + '&per_page=100'
+        var user = me
+        if (opts.user) user = {login: opts.user}
+        var reqUrl = base + '/user' + (opts.user ? 's/' + opts.user : '/') + '/repos?sort=pushed&page=' + pageNum + '&per_page=100'
         ev.emit('load-progress', pageNum.toString())
         request(reqUrl, { json: true, headers: headers }, function(err, resp, repos) {
           if (err || resp.statusCode > 299) return cb(err || resp.statusCode)
-          if (repos.length === 0) return cb(null, {user: me, repos: allRepos})
+          if (repos.length === 0) return cb(null, {user: user, repos: allRepos})
           if (opts.since) {
             for (var i = 0; i < repos.length; i++) {
               var r = repos[i]
-              if (r.pushed_at < opts.since) return cb(null, {user: me, repos: allRepos})
+              if (r.pushed_at < opts.since) return cb(null, {user: user, repos: allRepos})
               else allRepos = allRepos.concat(r)
             }
           } else {

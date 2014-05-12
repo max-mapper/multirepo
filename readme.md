@@ -1,6 +1,10 @@
 # multirepo
 
-work in progress. a power tool for batch processing github repos + npm modules
+[![NPM](https://nodei.co/npm/multirepo.png)](https://nodei.co/npm/multirepo/)
+
+a power tool for batch processing github repos + npm modules
+
+## usage
 
 install and clone all your repos into `cwd`:
 
@@ -29,3 +33,9 @@ multirepo pull --since 2013-11-28
 ```
 
 you can check how many have changed by just running `multirepo`
+
+clone someone elses repos:
+
+```sh
+multirepo clone --user substack --since 2014-01-01
+```

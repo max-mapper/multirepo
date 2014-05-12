@@ -34,6 +34,8 @@ auth(function(err, authData) {
     sort: 'updated'
   }
   
+  if (argv.user) repoOpts.user = argv.user
+  
   if (lastFetch) {
     repoOpts.since = lastFetch
     console.log('Checking for repos with new pushes since', lastFetch)
@@ -45,7 +47,7 @@ auth(function(err, authData) {
     // filter out repos that you don't own
     var repos = []
     data.repos.map(function(r) {
-      if (r.owner.login === data.user.login) repos.push(r)
+      if (r.owner.login.toLowerCase() === data.user.login.toLowerCase()) repos.push(r)
     })
     
     console.log(repos.length + ' repo(s) with new pushes have been found')
