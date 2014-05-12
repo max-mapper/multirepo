@@ -26,6 +26,10 @@ Pulling repo maxogden/multirepo...
 Cloned 0 new repos, skipped 0 existing repos, pulled 1 existing repos.
 ```
 
+your github credentials are stored in `~/.config/multirepo-github.json`. 
+
+the timestamp of your last successful pull/clone is stored in `~/.config/last-multirepo-fetch.txt`
+
 clone and pull all new repos since a custom timestamp:
 
 ```sh
