@@ -43,3 +43,35 @@ clone someone elses repos:
 ```sh
 multirepo clone --user substack --since 2014-01-01
 ```
+
+## bulk updating
+
+If you clone many users' repos into one repositories organized by username, e.g.:
+
+```
+$ ls repositories/
+dominictarr
+mafintosh
+maxogden
+raynos
+rvagg
+substack
+```
+
+then you can put this bash script in your `repositories` folder and run it to bulk update all of the sub-multirepo folders:
+
+```sh
+#!/bin/bash
+
+for i in * ; do
+  if [ -d "$i" ]; then
+    cd $(basename "$i")
+    CMD="multirepo clone --pull --user $(basename "$i") --since $(cat ../lastdate.txt)"
+    echo $CMD
+    $CMD
+    cd ..
+  fi
+done
+date +%Y-%m-%d > lastdate.txt
+ 
+```
