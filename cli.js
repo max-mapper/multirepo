@@ -35,6 +35,7 @@ auth(function(err, authData) {
   }
   
   if (argv.user) repoOpts.user = argv.user
+  if (argv.forks) repoOpts.forks = true
   
   if (lastFetch) {
     repoOpts.since = lastFetch

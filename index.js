@@ -42,6 +42,13 @@ module.exports = function(opts, cb) {
           } else {
             allRepos = allRepos.concat(repos)
           }
+
+          if (!opts.forks) {
+            allRepos = allRepos.filter(function(repo) {
+              return !repo.fork
+            })
+          }
+
           getRepos(pageNum++)
         })
       }
