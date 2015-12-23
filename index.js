@@ -28,7 +28,7 @@ module.exports = function(opts, cb) {
       function getRepos() {
         var user = me
         if (opts.user) user = {login: opts.user}
-        var reqUrl = base + '/user' + (opts.user ? 's/' + opts.user : '/') + '/repos?sort=pushed&page=' + pageNum + '&per_page=100'
+        var reqUrl = base + '/user' + (opts.user ? 's/' + opts.user : '') + '/repos?sort=pushed&page=' + pageNum + '&per_page=100'
         ev.emit('load-progress', pageNum.toString())
         request(reqUrl, { json: true, headers: headers }, function(err, resp, repos) {
           if (err || resp.statusCode > 299) return cb(err || resp.statusCode)
