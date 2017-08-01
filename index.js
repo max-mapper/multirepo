@@ -3,6 +3,7 @@ var series = require('run-series')
 var child = require('child_process')
 var path = require('path')
 var fs = require('fs')
+var url = require('url')
 var Emitter = require('events').EventEmitter
 
 var base = 'https://api.github.com'
@@ -64,13 +65,16 @@ module.exports = function(opts, cb) {
       cb = options
       options = {}
     }
+
+    var isOwnerUser = !options.user
     var functions = repos.map(function(repo) {
       return function clone(cb) {
         var repoPath = path.join(process.cwd(), repo.name)
-        var repoResult = {full_name: repo.full_name, clone_url: repo.clone_url}
+        var cloneUrl = isOwnerUser ? sshifyUrl(repo.clone_url) : repo.clone_url
+        var repoResult = {full_name: repo.full_name, clone_url: cloneUrl}
         if (options.pull && fs.existsSync(repoPath)) return pull()
         ev.emit('clone-progress', repo)
-        child.exec('git clone ' + repo.clone_url, function(err, stdo, stde) {
+        child.exec('git clone ' + repoResult.clone_url, function(err, stdo, stde) {
           repoResult.stdout = stdo
           repoResult.stderr = stde
           if (!options.pull) return cb(null, repoResult)
@@ -103,4 +107,8 @@ module.exports = function(opts, cb) {
     })
   }
   
+  function sshifyUrl(uri) {
+    var parts = url.parse(uri)
+    return 'git@' + parts.host + ':' + parts.pathname.slice(1)
+  }
 }
